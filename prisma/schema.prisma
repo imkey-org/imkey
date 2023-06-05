@@ -1,0 +1,378 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+generator zod {
+    provider  = "zod-prisma"
+    output    = "../zod-schemas"
+    modelCase = "camelCase"
+}
+
+datasource db {
+    provider = "mongodb"
+    // NOTE: When using postgresql, mysql or sqlserver, uncomment the @db.Text annotations in model Account below
+    // Further reading:
+    // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
+    // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
+    url      = env("DATABASE_URL")
+}
+
+// User
+model User {
+    id            String      @id @default(auto()) @map("_id") @db.ObjectId
+    name          String
+    email         String      @unique
+    username      String      @unique
+    password      String
+    role          Role        @default(Anggota)
+    emailVerified DateTime?
+    isActive      Boolean     @default(false)
+    loginAttempts Int?
+    blockExpires  DateTime?
+    accounts      Account[]
+    createdAt     DateTime    @default(now())
+    updatedAt     DateTime    @updatedAt
+    Article       Article[]
+    LinkHub       LinkHub[]
+    ShortLink     ShortLink[]
+    Management     Management[]
+    ApprovalProgram ApprovalProgram[]
+    ApprovalEvent ApprovalEvent[]
+}
+
+model Account {
+    id                String  @id @default(auto()) @map("_id") @db.ObjectId
+    userId            String  @db.ObjectId
+    type              String
+    provider          String
+    providerAccountId String
+    refresh_token     String?
+    access_token      String?
+    expires_at        Int?
+    token_type        String?
+    scope             String?
+    id_token          String?
+    session_state     String?
+    addressAccount    String?
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([provider, providerAccountId])
+}
+
+model ForgotPassword {
+    id             String   @id @default(auto()) @map("_id") @db.ObjectId
+    token          String   @unique
+    email          String
+    firstUsed      Boolean?
+    finalUsed      Boolean?
+    expires        DateTime
+    ipRequest      String
+    browserRequest String
+    countryRequest String
+    ipChanged      String?
+    browserChanged String?
+    countryChanged String?
+}
+
+model VerificationEmailToken {
+    id      String   @id @default(auto()) @map("_id") @db.ObjectId
+    token   String   @unique
+    email   String
+    expires DateTime
+}
+
+model VerificationToken {
+    id         String   @id @default(auto()) @map("_id") @db.ObjectId
+    identifier String
+    token      String   @unique
+    expires    DateTime
+
+    @@unique([identifier, token])
+}
+
+// Article
+model Category {
+    id           String   @id @default(auto()) @map("_id") @db.ObjectId
+    nameCategory String   @unique
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+    articleId    String[] @db.ObjectId
+
+    article Article[] @relation(fields: [articleId], references: [id])
+}
+
+model Article {
+    id               String    @id @default(auto()) @map("_id") @db.ObjectId
+    titleArticle     String
+    slugArticle      String
+    contentArticle   Json
+    thumbnailArticle Json
+    author           String    @db.ObjectId
+    categoryId       String[]  @db.ObjectId
+    publish          Publish   @default(Draft)
+    datePublish      DateTime?
+    createdAt        DateTime  @default(now())
+    updatedAt        DateTime  @updatedAt
+
+    category Category[] @relation(fields: [categoryId], references: [id])
+    user     User       @relation(fields: [author], references: [id])
+
+    @@unique([titleArticle, slugArticle])
+}
+
+// LinkHub
+model LinkHubTheme {
+    id        String    @id @default(auto()) @map("_id") @db.ObjectId
+    themeName String
+    userId    String    @db.ObjectId
+    dataTheme Json
+    isActive  Boolean
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    LinkHub   LinkHub[]
+}
+
+model LinkHub {
+    id          String   @id @default(auto()) @map("_id") @db.ObjectId
+    title       String
+    username    String   @unique
+    description String?
+    thumbnail   Json?
+    userId      String   @db.ObjectId
+    themeId     String   @db.ObjectId
+    isActive    Boolean  @default(false)
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    user  User         @relation(fields: [userId], references: [id])
+    theme LinkHubTheme @relation(fields: [themeId], references: [id])
+}
+
+model LinkHubDetail {
+    id         String   @id @default(auto()) @map("_id") @db.ObjectId
+    linkhubId  String   @db.ObjectId
+    title      String
+    url        String
+    icon       String?
+    iconCustom Json?
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+}
+
+// Shortlink
+model ShortLink {
+    id             String   @id @default(auto()) @map("_id") @db.ObjectId
+    titleShortLink String?
+    shortName      String
+    url            String
+    userId         String   @db.ObjectId
+    createdAt      DateTime @default(now())
+    updatedAt      DateTime @updatedAt
+
+    user User @relation(fields: [userId], references: [id])
+}
+
+// Structure
+model StructureOrganization {
+    id              String            @id @default(auto()) @map("_id") @db.ObjectId
+    nameStructure   String            @unique
+    statusStructure Structure         @default(Department)
+    orderStructure  Int
+    createdAt       DateTime          @default(now())
+    updatedAt       DateTime          @updatedAt
+    TaskDepartement TaskDepartment[]
+    Management       Management[]
+    WorkProgram      WorkProgram[]
+    Event            Event[]
+}
+
+model TaskDepartment {
+    id           String   @id @default(auto()) @map("_id") @db.ObjectId
+    noteTask     String
+    departmentId String   @db.ObjectId
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+    departement StructureOrganization @relation(fields: [departmentId], references: [id])
+}
+
+// Organizer
+model Period {
+    id               String      @id @default(auto()) @map("_id") @db.ObjectId
+    namePeriod       String
+    startPeriodYear  DateTime
+    finishPeriodYear DateTime
+    isActive         Boolean
+    Management        Management[]
+    WorkProgram WorkProgram[]
+    Event       Event[]
+}
+
+model Management {
+    id           String             @id @default(auto()) @map("_id") @db.ObjectId
+    userId       String             @db.ObjectId
+    position     PositionOrganizer?
+    photo	     Json
+    departmentId String             @db.ObjectId
+    periodId     String             @db.ObjectId
+    createdAt    DateTime           @default(now())
+    updatedAt    DateTime           @updatedAt
+
+    user        User                  @relation(fields: [userId], references: [id])
+    departement StructureOrganization @relation(fields: [departmentId], references: [id])
+    period      Period                @relation(fields: [periodId], references: [id])
+    WorkProgram WorkProgram[]
+    Event       Event[]
+}
+
+model WorkProgram {
+    id           String   @id @default(auto()) @map("_id") @db.ObjectId
+    nameProgram     String
+    departmentId String   @db.ObjectId
+    scheduleProgram DateTime
+    statusProgram StatusProgram @default(Pending)
+    fundsProgram   Int
+    goalProgram    String
+    periodId       String   @db.ObjectId
+    personResponsible String @db.ObjectId
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+    departement StructureOrganization @relation(fields: [departmentId], references: [id])
+    period      Period                @relation(fields: [periodId], references: [id])
+    person      Management            @relation(fields: [personResponsible], references: [id])
+
+    ApprovalProgram ApprovalProgram[]
+    Event       Event[]
+}
+
+model ApprovalProgram {
+    id           String   @id @default(auto()) @map("_id") @db.ObjectId
+    noteProgram String
+    workProgramId String   @db.ObjectId
+    userId        String   @db.ObjectId
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+    workProgram WorkProgram @relation(fields: [workProgramId], references: [id])
+    user        User        @relation(fields: [userId], references: [id])
+}
+
+model Event {
+    id           String   @id @default(auto()) @map("_id") @db.ObjectId
+    nameEvent    String
+    descriptionEvent  String
+    personResponsible String? @db.ObjectId
+    goalEvent    String
+    departmentId String   @db.ObjectId
+    periodId       String   @db.ObjectId
+    startDateEvent DateTime
+    finishDateEvent DateTime
+    fundsEvent    Int
+    thumbnailEvent Json
+    statusEvent   StatusEvent @default(Upcoming)
+    workProgramId String?   @db.ObjectId
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+    departement StructureOrganization @relation(fields: [departmentId], references: [id])
+    period      Period                @relation(fields: [periodId], references: [id])
+    person      Management?            @relation(fields: [personResponsible], references: [id])
+    workProgram WorkProgram?           @relation(fields: [workProgramId], references: [id])
+
+    ApprovalEvent ApprovalEvent[]
+    LPJEvent      LPJEvent[]
+    ProposalEvent ProposalEvent[]
+    Galeri        Galeri[]
+}
+
+model ApprovalEvent {
+    id           String   @id @default(auto()) @map("_id") @db.ObjectId
+    noteEvent    String
+    eventId      String   @db.ObjectId
+    userId       String   @db.ObjectId
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+    event Event @relation(fields: [eventId], references: [id])
+    user  User  @relation(fields: [userId], references: [id])
+}
+
+model LPJEvent {
+    id           String   @id @default(auto()) @map("_id") @db.ObjectId
+    fileLPJ      Json
+    eventId      String   @db.ObjectId
+    statusLPJ    StatusLPJOrProposal
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+    event Event @relation(fields: [eventId], references: [id])
+}
+
+model ProposalEvent {
+    id           String   @id @default(auto()) @map("_id") @db.ObjectId
+    fileProposal Json
+    eventId      String   @db.ObjectId
+    statusProposal    StatusLPJOrProposal
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+    event Event @relation(fields: [eventId], references: [id])
+}
+
+model Galeri {
+    id           String   @id @default(auto()) @map("_id") @db.ObjectId
+    titleGaleri   String
+    descriptionGaleri String
+    fileGaleri Json
+    eventId      String?   @db.ObjectId
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+    event Event? @relation(fields: [eventId], references: [id])
+}
+
+// Utils
+enum Role {
+    Anggota
+    BPH
+    DPO
+    Pengurus
+}
+
+enum Structure {
+    Core
+    Department
+}
+
+enum PositionOrganizer {
+    Head
+    Staff
+}
+
+enum Publish {
+    Publish
+    Draft
+}
+
+enum StatusProgram {
+    Done
+    OnProgress
+    Pending
+    Unexecuted
+}
+
+enum StatusEvent {
+    Done
+    OnProgress
+    Upcoming
+}
+
+enum StatusLPJOrProposal {
+    Accepted
+    Rejected
+}
