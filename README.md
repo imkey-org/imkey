@@ -104,17 +104,15 @@ $ yarn run test:cov
 
 ## Contributors
 
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<a href="https://github.com/imkey-org/imkey/graphs/contributors">
 
-<!-- prettier-ignore-start -->
+  <img src="https://contrib.rocks/image?repo=imkey-org/imkey" />
 
-<!-- markdownlint-disable -->
+</a>
 
-<!-- markdownlint-restore -->
 
-<!-- prettier-ignore-end -->
 
-<!-- ALL-CONTRIBUTORS-LIST:END -->
+_Note: It may take up to 24h for the [contrib.rocks](https://contrib.rocks/image?repo=imkey-org/imkey) plugin to update because it's refreshed once a day._
 
 
 
