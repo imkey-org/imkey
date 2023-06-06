@@ -102,17 +102,26 @@ $ yarn run test:cov
   <img src="https://images.ctfassets.net/e5382hct74si/78Olo8EZRdUlcDUFQvnzG7/fa4cdb6dc04c40fceac194134788a0e2/1618983297-powered-by-vercel.svg" width="200px" />
 </a>
 
-## Contributors Wall
-<a href="https://github.com/imkey-org/imkey/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=imkey-org/imkey" />
-</a>
+## Contributors
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+
+<!-- prettier-ignore-start -->
+
+<!-- markdownlint-disable -->
+
+<!-- markdownlint-restore -->
+
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
 
 
-_Note: It may take up to 24h for the [contrib.rocks](https://contrib.rocks/image?repo=imkey-org/imkey) plugin to update because it's refreshed once a day._
+
+
 
 ## License
 
 IMKEY is packaged and distributed using the [MIT License](https://choosealicense.com/licenses/mit/) which allows for commercial use, distribution, modification and private use provided that all copies of the software contain the same license and copyright.
 
 _By the community, for the community._
-A passion project by [Nizar Fadlan](https://nizarfadlan.dev)
